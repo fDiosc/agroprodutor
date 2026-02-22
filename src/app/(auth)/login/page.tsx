@@ -28,24 +28,14 @@ function LoginForm() {
       callbackUrl,
     })
 
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/9b920d8e-189a-4809-bc5e-0472e131128a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'login/page.tsx:signIn-result',message:'signIn result',data:{result,callbackUrl},timestamp:Date.now(),hypothesisId:'H1-H5'})}).catch(()=>{});
-    // #endregion
-
     setIsLoading(false)
 
     if (result?.error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/9b920d8e-189a-4809-bc5e-0472e131128a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'login/page.tsx:error-branch',message:'signIn returned error',data:{error:result.error,status:result.status},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
-      // #endregion
       setError('Email ou senha inválidos. Tente novamente.')
       return
     }
 
     if (result?.ok) {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/9b920d8e-189a-4809-bc5e-0472e131128a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'login/page.tsx:redirect',message:'About to redirect',data:{callbackUrl,resultUrl:result.url},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-      // #endregion
       window.location.href = callbackUrl
     }
   }
