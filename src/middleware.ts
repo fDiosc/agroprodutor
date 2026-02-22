@@ -13,12 +13,14 @@ export async function middleware(req: NextRequest) {
 
   if (isPublic) return NextResponse.next()
 
+  const isSecure = req.headers.get('x-forwarded-proto') === 'https'
+
   // #region agent log
   const cookieNames = req.cookies.getAll().map(c => c.name)
-  console.log('[DEBUG-MW]', JSON.stringify({ pathname, cookieNames, hasSecret: !!process.env.NEXTAUTH_SECRET, secretLen: process.env.NEXTAUTH_SECRET?.length }))
+  console.log('[DEBUG-MW]', JSON.stringify({ pathname, cookieNames, isSecure, hasSecret: !!process.env.NEXTAUTH_SECRET, secretLen: process.env.NEXTAUTH_SECRET?.length }))
   // #endregion
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET, secureCookie: isSecure })
 
   // #region agent log
   console.log('[DEBUG-MW]', JSON.stringify({ pathname, tokenFound: !!token, tokenId: token?.id ?? null }))
