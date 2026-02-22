@@ -108,12 +108,22 @@ Mapa interativo para o Dashboard:
 
 ### MeteorologiaClient
 
-Página completa de meteorologia:
-- Dropdown seletor de propriedade
-- Previsão 14 dias em cards verticais (ícone, data, temp, chuva, umidade, vento)
-- 4 cards de resumo: chuva acumulada, janela de pulverização, dias secos, ET₀ média
-- Tabela detalhada com todas as variáveis diárias
-- Cálculo de janela de pulverização (umidade < 85%, vento < 15 km/h)
+Página completa de meteorologia com layout responsivo:
+- Dropdown seletor de propriedade (full-width no mobile)
+- **Gráfico SVG** (`WeatherChart`): Barras azuis semi-transparentes para chuva (mm), linha vermelha para temp. máx, linha azul-celeste para temp. mín. Labels nos eixos, legenda no header. Responsivo via viewBox.
+- 4 cards de resumo (grid 2x2 mobile, 4 colunas desktop): chuva acumulada, janela de pulverização, dias secos, ET₀ média
+- **Desktop** (`hidden sm:block`): Tabela detalhada com 9 colunas (dia, tempo, máx, mín, chuva, umidade, vento, ET₀, pulverizar)
+- **Mobile** (`block sm:hidden`): Lista vertical `MobileDayRow` com ícone, temp, condição, chuva, umidade e badge de pulverização
+- Cálculo de janela de pulverização (umidade 55-85%, vento < 10 km/h)
+
+### DeletePropertyButton
+
+Botão de remoção de propriedade:
+- Botão vermelho com ícone TrashIcon
+- Confirmação inline ("Remover X? Confirmar / Cancelar")
+- Chama DELETE `/api/properties/[id]`
+- Redireciona para `/properties` após remoção
+- Cascade delete: relatórios ESG, EUDR, produtividade e alertas
 
 ### FeatureFlagsSection
 

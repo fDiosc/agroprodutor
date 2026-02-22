@@ -122,24 +122,32 @@ Tela inicial com visão consolidada:
 Previsão meteorológica detalhada por propriedade (`/meteorologia`):
 - Seletor de propriedade (dropdown)
 - Previsão de 14 dias via Open-Meteo API (gratuita, sem chave)
+- **Gráfico SVG**: Barras de precipitação (mm) + linhas de temperatura máx/mín (°C), responsivo
 - **Cards de resumo**: Chuva acumulada, janela de pulverização, dias secos, evapotranspiração média
-- **Tabela diária**: Temperatura, chuva, umidade, vento, ET₀ e código de condição
-- **Janela de pulverização**: Calculada automaticamente quando umidade < 85% e vento < 15 km/h
+- **Desktop**: Tabela detalhada com temperatura, chuva, umidade, vento, ET₀ e pulverização
+- **Mobile**: Lista vertical simplificada com ícone, temperatura, condição e chuva por dia
+- **Janela de pulverização**: Calculada automaticamente quando umidade 55-85% e vento < 10 km/h
 
 ### Minhas Propriedades
 
 Cards visuais com indicadores de status:
 - Barra de acento colorida (verde = conforme, vermelha = não conforme, cinza = pendente)
 - Nome, localização (município/UF), área em hectares
-- Código CAR completo sem truncamento
+- Código CAR completo sem truncamento (normalizado para formato `UF-IBGE-HASH`)
 - Status ESG e EUDR com ícones dedicados (ShieldCheck, Globe)
 - Contador de apontamentos e data da última verificação
 - Previsão do tempo do dia (WeatherMini)
 - Hover com elevação e link "Ver detalhes"
+- **Remover propriedade**: Botão com confirmação inline na página de detalhe
 
 Duas formas de cadastrar:
-1. **Código CAR**: Digitar o código diretamente no formulário
+1. **Código CAR**: Digitar o código diretamente no formulário (normalizado automaticamente)
 2. **Buscar no Mapa**: Clicar no mapa para buscar CARs por coordenada, com busca por endereço, polígonos CAR, camadas de estados e municípios (IBGE WMS)
+
+### Normalização de Dados
+
+- **CAR**: `normalizeCarCode()` converte qualquer formato (pontos, espaços, etc.) para `UF-IBGECODE-HASH`. Aplicado em todos os endpoints de entrada e no refresh ESG (auto-fix de CARs existentes)
+- **CPF/CNPJ**: `normalizeCpfCnpj()` remove caracteres não numéricos para armazenamento uniforme. `formatCpfCnpj()` formata para exibição
 
 ### Gestão de Fornecedores
 

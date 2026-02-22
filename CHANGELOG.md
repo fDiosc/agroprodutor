@@ -9,18 +9,24 @@ Todas as mudanças notáveis neste projeto serão documentadas aqui.
 - **Dashboard Redesenhado**: Layout em 2 colunas com mapa interativo de polígonos e cards de propriedade com clima integrado
 - **Mapa de Propriedades**: Polígonos GeoJSON coloridos por status ESG (verde/vermelho/cinza) com tooltip e clique para detalhe
 - **Meteorologia**: Nova página `/meteorologia` com previsão de 14 dias por propriedade via Open-Meteo API (gratuita)
+- **Gráfico de Chuva e Temperatura**: SVG responsivo com barras de precipitação e linhas de temp. máx/mín no período de 14 dias
 - **Indicadores Meteorológicos**: Temperatura, chuva, umidade, vento, ET₀ e cálculo automático de janela de pulverização
 - **Clima no Card**: Cada card de propriedade mostra previsão do dia (temperatura, condição, chuva acumulada 3 dias)
 - **Landing Page**: Página pública com apresentação do produto, features e CTAs para registro/login
 - **Feature Flags**: Sistema de flags por workspace controlado por super admin via Settings
 - **Super Admin**: Novo campo `superAdmin` no modelo User com painel exclusivo de controle
 - **Proteção de Relatórios**: Seção de Relatórios oculta por padrão, habilitável via feature flag
+- **Remover Propriedade**: Botão com confirmação inline na página de detalhe, cascade delete para relatórios e alertas
 
 ### Melhorias
 
+- **Normalização de CAR**: Função `normalizeCarCode` converte qualquer formato para `UF-IBGECODE-HASH` (ex: `MT.5107925.ABC...` → `MT-5107925-ABC...`)
+- **Normalização de CPF/CNPJ**: Função `normalizeCpfCnpj` remove pontos/traços para armazenamento uniforme (somente dígitos)
+- **Auto-fix CAR no Refresh**: Ao atualizar relatório ESG, CARs com formato incorreto são corrigidos automaticamente e polígonos re-buscados
 - **EUDR Desativado por Padrão**: `eudrEnabled` agora é `false` por padrão para evitar confusão no relatório
 - **CPF/CNPJ Obrigatório**: Campo agora é obrigatório no registro com validação frontend e backend
 - **Erro de CPF/CNPJ Duplicado**: Mensagem clara "Este CPF/CNPJ já está cadastrado" ao invés de erro genérico 500
+- **Meteorologia Mobile**: Layout simplificado com lista vertical de dias e gráfico responsivo; tabela detalhada apenas no desktop
 - **Header Compacto**: Saudação personalizada "Bem-vindo, {nome}" com dot de status inline
 - **Stats Compactos**: 4 indicadores em row horizontal com ícones
 - **Legenda do Mapa**: Legenda visual com cores de status abaixo do mapa
@@ -45,6 +51,10 @@ Todas as mudanças notáveis neste projeto serão documentadas aqui.
 - **`trustHost: true`**: NextAuth configurado para funcionar atrás de reverse proxy (CapRover)
 - **`secureCookie` no Middleware**: Detecção automática de HTTPS via `x-forwarded-proto` para `getToken`
 - **`getPolygonCentroid()`**: Utilitário para calcular centroid de GeoJSON
+- **`normalizeCarCode()`**: Utilitário para normalizar CAR para formato padrão `UF-IBGE-HASH`
+- **`normalizeCpfCnpj()`**: Utilitário para limpar CPF/CNPJ (somente dígitos)
+- **PATCH `/api/properties/[id]`**: Endpoint para corrigir CAR e re-buscar polígono
+- **DELETE `/api/properties/[id]`**: Remoção de propriedade com cascade (já existia, agora com UI)
 
 ### Deploy
 
