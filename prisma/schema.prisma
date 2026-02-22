@@ -1,0 +1,244 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum WorkspaceType {
+  FREE
+  PARTNER
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum AlertType {
+  STATUS_CHANGE
+  NEW_EMBARGO
+  EUDR_CHANGE
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model Workspace {
+  id                String        @id @default(uuid())
+  name              String
+  slug              String        @unique
+  type              WorkspaceType @default(FREE)
+  partnerEntityName String?       @map("partner_entity_name")
+  settings          Json?
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  members    WorkspaceMember[]
+  properties Property[]
+
+  @@map("workspaces")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  cpfCnpj      String?  @unique @map("cpf_cnpj")
+  phone        String?
+  passwordHash String   @map("password_hash")
+  advancedMode Boolean  @default(false) @map("advanced_mode")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  memberships    WorkspaceMember[]
+  properties     Property[]
+  suppliers      Supplier[]
+  supplierChecks SupplierCheck[]
+  reportConfig   ReportConfig?
+
+  @@map("users")
+}
+
+model WorkspaceMember {
+  id          String     @id @default(uuid())
+  workspaceId String     @map("workspace_id")
+  userId      String     @map("user_id")
+  role        MemberRole @default(MEMBER)
+  joinedAt    DateTime   @default(now()) @map("joined_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model Property {
+  id          String   @id @default(uuid())
+  workspaceId String   @map("workspace_id")
+  userId      String   @map("user_id")
+  carCode     String   @map("car_code")
+  name        String?
+  municipio   String?
+  uf          String?
+  areaImovel  Float?   @map("area_imovel")
+  carStatus   String?  @map("car_status")
+  esgStatus   String?  @map("esg_status")
+  eudrStatus  String?  @map("eudr_status")
+  geoPolygon  Json?    @map("geo_polygon")
+  lastCheckAt DateTime? @map("last_check_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  esgReports         EsgReport[]
+  eudrReports        EudrReport[]
+  productivityReports ProductivityReport[]
+  alerts             Alert[]
+
+  @@unique([workspaceId, carCode])
+  @@index([workspaceId])
+  @@index([userId])
+  @@map("properties")
+}
+
+model ReportConfig {
+  id                    String   @id @default(uuid())
+  userId                String   @unique @map("user_id")
+  esgEnabled            Boolean  @default(true) @map("esg_enabled")
+  eudrEnabled           Boolean  @default(true) @map("eudr_enabled")
+  productivityEnabled   Boolean  @default(true) @map("productivity_enabled")
+  producerReportEnabled Boolean  @default(true) @map("producer_report_enabled")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("report_configs")
+}
+
+model EsgReport {
+  id                String   @id @default(uuid())
+  propertyId        String   @map("property_id")
+  esgStatus         String   @map("esg_status")
+  fullData          Json     @map("full_data")
+  totalApontamentos Int      @map("total_apontamentos")
+  checkedAt         DateTime @default(now()) @map("checked_at")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("esg_reports")
+}
+
+model EudrReport {
+  id              String   @id @default(uuid())
+  propertyId      String   @map("property_id")
+  euStatus        String   @map("eu_status")
+  forestLossArea  Float?   @map("forest_loss_area")
+  layerData       Json?    @map("layer_data")
+  prodesLayerData Json?    @map("prodes_layer_data")
+  checkedAt       DateTime @default(now()) @map("checked_at")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("eudr_reports")
+}
+
+model ProductivityReport {
+  id                  String   @id @default(uuid())
+  propertyId          String   @map("property_id")
+  culture             String
+  harvest             String?
+  plantedArea         Float?   @map("planted_area")
+  declaredArea        Float?   @map("declared_area")
+  countyProductivity  Float?   @map("county_productivity")
+  estimatedProduction Float?   @map("estimated_production")
+  geoJsonCrops        Json?    @map("geo_json_crops")
+  checkedAt           DateTime @default(now()) @map("checked_at")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("productivity_reports")
+}
+
+model Alert {
+  id         String        @id @default(uuid())
+  propertyId String        @map("property_id")
+  type       AlertType
+  severity   AlertSeverity
+  message    String
+  read       Boolean       @default(false)
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("alerts")
+}
+
+model Supplier {
+  id          String    @id @default(uuid())
+  workspaceId String    @map("workspace_id")
+  userId      String    @map("user_id")
+  name        String
+  cpfCnpj     String    @map("cpf_cnpj")
+  esgStatus   String?   @map("esg_status")
+  lastCheckAt DateTime? @map("last_check_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cars   SupplierCar[]
+  checks SupplierCheck[]
+
+  @@unique([workspaceId, cpfCnpj])
+  @@index([workspaceId])
+  @@map("suppliers")
+}
+
+model SupplierCar {
+  id          String    @id @default(uuid())
+  supplierId  String    @map("supplier_id")
+  carCode     String    @map("car_code")
+  esgStatus   String?   @map("esg_status")
+  eudrStatus  String?   @map("eudr_status")
+  lastCheckAt DateTime? @map("last_check_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@unique([supplierId, carCode])
+  @@index([supplierId])
+  @@map("supplier_cars")
+}
+
+model SupplierCheck {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  workspaceId     String   @map("workspace_id")
+  supplierId      String?  @map("supplier_id")
+  supplierCpfCnpj String?  @map("supplier_cpf_cnpj")
+  supplierName    String?  @map("supplier_name")
+  supplierCar     String?  @map("supplier_car")
+  esgStatus       String?  @map("esg_status")
+  eudrStatus      String?  @map("eudr_status")
+  reportData      Json?    @map("report_data")
+  checkedAt       DateTime @default(now()) @map("checked_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  supplier Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([supplierId])
+  @@map("supplier_checks")
+}

@@ -1,0 +1,11 @@
+node_modules
+.next
+.env
+.env.*
+!.env.example
+/generated/prisma
+*.tsbuildinfo
+next-env.d.ts
+playwright-report
+test-results
+*.pdf
