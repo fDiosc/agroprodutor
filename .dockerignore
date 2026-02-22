@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+*.pdf
+playwright-report
+test-results
+tests
+*.tsbuildinfo
+next-env.d.ts
+temporary-captain-to-deploy.tar
