@@ -4,9 +4,10 @@ import { prisma } from '@/lib/prisma'
 import { merxApi } from '@/lib/merx-api'
 import { geoServer } from '@/lib/geoserver'
 import { getAuthSession } from '@/lib/api-helpers'
+import { normalizeCarCode } from '@/lib/utils'
 
 const createPropertySchema = z.object({
-  carCode: z.string().min(1, 'Código CAR é obrigatório'),
+  carCode: z.string().min(1, 'Código CAR é obrigatório').transform(normalizeCarCode),
   name: z.string().optional(),
 })
 

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { merxApi } from '@/lib/merx-api'
 import { geoServer } from '@/lib/geoserver'
 import { getAuthSession, getPropertyForWorkspace } from '@/lib/api-helpers'
+import { normalizeCarCode } from '@/lib/utils'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -18,25 +19,30 @@ export async function POST(_request: Request, { params }: RouteParams) {
   }
 
   try {
-    const esgData = await merxApi.getPropertyEsgReport(property.carCode)
+    const carCode = normalizeCarCode(property.carCode)
+    const carFixed = carCode !== property.carCode
+    if (carFixed) {
+      await prisma.property.update({ where: { id }, data: { carCode } })
+    }
+
+    const esgData = await merxApi.getPropertyEsgReport(carCode)
 
     const owner = await prisma.user.findUnique({
       where: { id: property.userId },
       select: { cpfCnpj: true },
     })
 
-    // Parallel non-critical fetches
     const [producerResult, polygonResult, eudrResult, soyResult, cornResult] =
       await Promise.allSettled([
         owner?.cpfCnpj
           ? merxApi.getProducerEsgReport(owner.cpfCnpj)
           : Promise.reject('no cpf'),
-        property.geoPolygon
+        property.geoPolygon && !carFixed
           ? Promise.reject('already has polygon')
-          : geoServer.getPropertyPolygon(property.carCode),
-        merxApi.getEudrReportResumed(property.carCode),
-        merxApi.getProductivity(property.carCode, 'SOY', { includeGeoJson: true }),
-        merxApi.getProductivity(property.carCode, 'CORN', { includeGeoJson: true }),
+          : geoServer.getPropertyPolygon(carCode),
+        merxApi.getEudrReportResumed(carCode),
+        merxApi.getProductivity(carCode, 'SOY', { includeGeoJson: true }),
+        merxApi.getProductivity(carCode, 'CORN', { includeGeoJson: true }),
       ])
 
     const producerData =

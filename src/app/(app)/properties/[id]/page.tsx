@@ -14,6 +14,7 @@ import { ApontamentosProdutor } from '@/components/reports/apontamentos-produtor
 import { EudrPropertySection } from '@/components/reports/eudr-property-section'
 import { RefreshReportButton } from '@/components/reports/refresh-report-button'
 import { DownloadPdfButton } from '@/components/reports/download-pdf-button'
+import { DeletePropertyButton } from '@/components/reports/delete-property-button'
 import { ReportHistory } from '@/components/reports/report-history'
 import { ProductivitySection } from '@/components/reports/productivity-section'
 import type { EudrLayer } from '@/components/eudr/eudr-layers-table'
@@ -132,6 +133,10 @@ export default async function PropertyDetailPage({
       <div className="flex flex-wrap items-center gap-2">
         <RefreshReportButton propertyId={property.id} />
         <DownloadPdfButton
+          propertyId={property.id}
+          propertyName={property.name || property.carCode}
+        />
+        <DeletePropertyButton
           propertyId={property.id}
           propertyName={property.name || property.carCode}
         />

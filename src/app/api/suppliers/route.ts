@@ -3,6 +3,7 @@ import { z, ZodError } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { getAuthSession } from '@/lib/api-helpers'
 import { merxApi } from '@/lib/merx-api'
+import { normalizeCarCode, normalizeCpfCnpj } from '@/lib/utils'
 
 const postBodySchema = z.object({
   type: z.enum(['cpf_cnpj', 'car']),
@@ -28,14 +29,16 @@ export async function POST(request: Request) {
     let reportData: object | null = null
 
     if (data.type === 'cpf_cnpj') {
-      const report = await merxApi.getProducerEsgReport(data.value)
+      const cleanCpf = normalizeCpfCnpj(data.value)
+      const report = await merxApi.getProducerEsgReport(cleanCpf)
       supplierCpfCnpj = report.cpf_cnpj
       esgStatus = report.esg_status
       reportData = report
     } else {
+      const normalizedCar = normalizeCarCode(data.value)
       const [esgReport, eudrReport] = await Promise.all([
-        merxApi.getPropertyEsgReport(data.value),
-        merxApi.getEudrReportResumed(data.value).catch(() => null),
+        merxApi.getPropertyEsgReport(normalizedCar),
+        merxApi.getEudrReportResumed(normalizedCar).catch(() => null),
       ])
       supplierCar = esgReport.car_imovel
       esgStatus = esgReport.esg_status

@@ -13,6 +13,31 @@ export function formatCpfCnpj(value: string): string {
   return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
 }
 
+/**
+ * Normalizes a CAR code to the standard format: UF-IBGECODE-HASH
+ * Strips dots, spaces, and non-alphanumeric chars except hyphens,
+ * then ensures hyphens are in the correct positions.
+ * Example: "MT.5107925.6D58F3CA..." → "MT-5107925-6D58F3CA..."
+ */
+export function normalizeCarCode(raw: string): string {
+  const cleaned = raw.trim().replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+  if (cleaned.length < 3) return cleaned
+  const uf = cleaned.slice(0, 2)
+  const rest = cleaned.slice(2)
+  const ibgeMatch = rest.match(/^(\d{7})(.+)$/)
+  if (ibgeMatch) {
+    return `${uf}-${ibgeMatch[1]}-${ibgeMatch[2]}`
+  }
+  return `${uf}-${rest}`
+}
+
+/**
+ * Strips non-digit characters from CPF/CNPJ for storage.
+ */
+export function normalizeCpfCnpj(raw: string): string {
+  return raw.replace(/\D/g, '')
+}
+
 export function formatArea(hectares: number): string {
   return new Intl.NumberFormat('pt-BR', {
     minimumFractionDigits: 2,

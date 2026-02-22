@@ -3,11 +3,12 @@ import bcrypt from 'bcryptjs'
 import { z, ZodError } from 'zod'
 import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { normalizeCpfCnpj } from '@/lib/utils'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   email: z.string().email('Email inválido'),
-  cpfCnpj: z.string().min(1, 'CPF/CNPJ é obrigatório'),
+  cpfCnpj: z.string().min(1, 'CPF/CNPJ é obrigatório').transform(normalizeCpfCnpj),
   phone: z.string().optional(),
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
 })

@@ -3,10 +3,11 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { getAuthSession } from '@/lib/api-helpers'
 import { merxApi } from '@/lib/merx-api'
+import { normalizeCpfCnpj } from '@/lib/utils'
 
 const createSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
-  cpfCnpj: z.string().min(1, 'CPF/CNPJ é obrigatório'),
+  cpfCnpj: z.string().min(1, 'CPF/CNPJ é obrigatório').transform(normalizeCpfCnpj),
 })
 
 export async function GET() {
@@ -33,10 +34,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     const data = createSchema.parse(body)
-    const cleaned = data.cpfCnpj.replace(/\D/g, '')
 
     const existing = await prisma.supplier.findUnique({
-      where: { workspaceId_cpfCnpj: { workspaceId, cpfCnpj: cleaned } },
+      where: { workspaceId_cpfCnpj: { workspaceId, cpfCnpj: data.cpfCnpj } },
     })
     if (existing) {
       return NextResponse.json({ error: 'Fornecedor já cadastrado com este CPF/CNPJ' }, { status: 409 })
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
     let esgStatus: string | null = null
     try {
-      const report = await merxApi.getProducerEsgReport(cleaned)
+      const report = await merxApi.getProducerEsgReport(data.cpfCnpj)
       esgStatus = report.esg_status
     } catch {
       /* non-critical */
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
         workspaceId,
         userId,
         name: data.name,
-        cpfCnpj: cleaned,
+        cpfCnpj: data.cpfCnpj,
         esgStatus,
         lastCheckAt: esgStatus ? new Date() : null,
       },

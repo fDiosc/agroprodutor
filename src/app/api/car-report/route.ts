@@ -1,17 +1,20 @@
 import { NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/api-helpers'
 import { merxApi, MerxApiError } from '@/lib/merx-api'
+import { normalizeCarCode } from '@/lib/utils'
 
 export async function GET(request: Request) {
   const { error } = await getAuthSession()
   if (error) return error
 
   const { searchParams } = new URL(request.url)
-  const car = searchParams.get('car')
+  const rawCar = searchParams.get('car')
 
-  if (!car) {
+  if (!rawCar) {
     return NextResponse.json({ error: 'Parâmetro car é obrigatório' }, { status: 400 })
   }
+
+  const car = normalizeCarCode(rawCar)
 
   try {
     const [esgReport, eudrReport] = await Promise.allSettled([

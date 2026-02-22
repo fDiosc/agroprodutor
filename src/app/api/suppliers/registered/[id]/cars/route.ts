@@ -3,11 +3,12 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { getAuthSession } from '@/lib/api-helpers'
 import { merxApi } from '@/lib/merx-api'
+import { normalizeCarCode } from '@/lib/utils'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
 const addCarSchema = z.object({
-  carCode: z.string().min(1, 'Código CAR é obrigatório'),
+  carCode: z.string().min(1, 'Código CAR é obrigatório').transform(normalizeCarCode),
 })
 
 export async function POST(request: Request, { params }: RouteParams) {
