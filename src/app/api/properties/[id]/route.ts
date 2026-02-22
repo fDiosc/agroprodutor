@@ -63,7 +63,7 @@ export async function PATCH(_request: Request, { params }: RouteParams) {
       where: { id },
       data: {
         ...(needsCarFix ? { carCode: normalizedCar } : {}),
-        geoPolygon: geoPolygon ?? undefined,
+        geoPolygon: (geoPolygon as unknown as Record<string, unknown>) ?? undefined,
       },
     })
 
