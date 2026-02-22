@@ -263,6 +263,13 @@ Modal "O que mudou?" com abas de versão e cards de funcionalidades. Exibido aut
 - **Retry/Backoff**: API Merx com retry automático (3 tentativas, backoff exponencial) para erros 5xx e 429
 - **Promise.allSettled**: Fetches paralelos não-críticos não bloqueiam o fluxo principal
 
+### Autenticação & Deploy
+
+- **Registro**: CPF/CNPJ obrigatório com validação de duplicidade (Prisma P2002 tratado)
+- **Login**: Redirect via `window.location.href` para compatibilidade com reverse proxy
+- **Middleware**: Detecção automática de `x-forwarded-proto: https` para `secureCookie` no `getToken`, garantindo leitura correta do cookie `__Secure-authjs.session-token` atrás de CapRover/Nginx
+- **`trustHost: true`**: NextAuth configurado para aceitar qualquer host (necessário atrás de proxy)
+
 ## Integrações Externas
 
 ### Merx API (`api.merx.tech`)
@@ -386,6 +393,22 @@ npx playwright test   # Testes E2E (Playwright)
 npm run build         # Build de produção
 npm start             # Inicia em modo produção
 ```
+
+### Deploy (CapRover)
+
+O projeto inclui `Dockerfile` multi-stage e `captain-definition` para deploy no CapRover.
+
+Variáveis de ambiente obrigatórias no CapRover:
+- `DATABASE_URL` — conexão PostgreSQL
+- `NEXTAUTH_SECRET` — secret para JWT (gerar com `openssl rand -base64 32`)
+- `NEXTAUTH_URL` — URL pública do app (ex: `https://app.example.com`)
+- `MERX_API_URL`, `MERX_API_KEY`, `MERX_COOP_ID` — credenciais Merx
+- `GEOSERVER_URL` — URL do GeoServer WFS
+
+Notas importantes:
+- O middleware detecta `x-forwarded-proto: https` automaticamente para cookies seguros
+- `trustHost: true` está configurado no NextAuth para funcionar atrás de reverse proxy
+- O `output: 'standalone'` no `next.config.ts` gera um build otimizado para Docker
 
 ## Scripts
 

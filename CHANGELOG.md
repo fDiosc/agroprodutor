@@ -19,9 +19,17 @@ Todas as mudanças notáveis neste projeto serão documentadas aqui.
 ### Melhorias
 
 - **EUDR Desativado por Padrão**: `eudrEnabled` agora é `false` por padrão para evitar confusão no relatório
+- **CPF/CNPJ Obrigatório**: Campo agora é obrigatório no registro com validação frontend e backend
+- **Erro de CPF/CNPJ Duplicado**: Mensagem clara "Este CPF/CNPJ já está cadastrado" ao invés de erro genérico 500
 - **Header Compacto**: Saudação personalizada "Bem-vindo, {nome}" com dot de status inline
 - **Stats Compactos**: 4 indicadores em row horizontal com ícones
 - **Legenda do Mapa**: Legenda visual com cores de status abaixo do mapa
+
+### Correções
+
+- **Login em Produção**: Middleware `getToken` agora detecta `x-forwarded-proto: https` para usar `secureCookie`, corrigindo redirect infinito atrás de reverse proxy (CapRover)
+- **Redirect Pós-Login**: `window.location.href` substitui `router.push` para garantir full page reload e leitura correta do cookie de sessão
+- **Modal Release Notes**: z-index elevado para `z-[9999]` para evitar sobreposição com mapa Leaflet
 
 ### Navegação
 
@@ -35,6 +43,7 @@ Todas as mudanças notáveis neste projeto serão documentadas aqui.
 - **API `/api/features`**: Retorna feature flags do workspace ativo
 - **API `/api/settings/features`**: Toggle de flags (somente super admin)
 - **`trustHost: true`**: NextAuth configurado para funcionar atrás de reverse proxy (CapRover)
+- **`secureCookie` no Middleware**: Detecção automática de HTTPS via `x-forwarded-proto` para `getToken`
 - **`getPolygonCentroid()`**: Utilitário para calcular centroid de GeoJSON
 
 ### Deploy

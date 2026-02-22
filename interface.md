@@ -217,12 +217,15 @@ Versão atual: `0.0.3`
 ## Formulários de Autenticação
 
 ### Registro
-- Campos obrigatórios com asterisco vermelho (`*`): Nome, Email, Senha, Confirmar Senha
-- Campos opcionais sem asterisco: CPF/CNPJ, Telefone
+- Campos obrigatórios com asterisco vermelho (`*`): Nome, Email, CPF/CNPJ, Senha, Confirmar Senha
+- Campos opcionais sem asterisco: Telefone
+- Validação de CPF/CNPJ duplicado com mensagem clara (409)
 - Botão olhinho (EyeIcon/EyeSlashIcon) nos campos de senha
+- Redirect pós-registro via `window.location.href` (full page load)
 
 ### Login
 - Botão olhinho no campo de senha
+- Redirect pós-login via `window.location.href` (compatível com reverse proxy)
 
 ## Mapa
 
