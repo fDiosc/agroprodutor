@@ -153,7 +153,7 @@ export function MobileDrawer({ isOpen, onClose, reportsEnabled = false }: Mobile
               }}
               className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/80 transition-colors hover:bg-white/10"
             >
-              V 0.0.2
+              V 0.0.3
               <span className="h-2.5 w-2.5 rounded-full bg-[#00C287]" />
             </button>
             <p className="text-[10px] text-white/40">Powered by Merx</p>

@@ -12,12 +12,16 @@ Plataforma digital para produtores rurais gerenciarem a conformidade socioambien
 │                    API Routes                           │
 │  /api/properties  /api/suppliers  /api/car-search       │
 │  /api/car-report  /api/producer-report  /api/alerts     │
+│  /api/weather  /api/features  /api/settings/features    │
+├──────────────┬──────────────┬───────────────────────────┤
 ├──────────────┬──────────────┬───────────────────────────┤
 │  Merx API    │  GeoServer   │  PostgreSQL (Prisma v7)   │
 │  ESG/EUDR/   │  WFS         │  Usuários, Propriedades,  │
 │  Produtivi-  │  Polígonos   │  Relatórios, Fornecedores │
 │  dade/CAR    │  CAR         │  Alertas, Workspaces      │
-└──────────────┴──────────────┴───────────────────────────┘
+├──────────────┴──────────────┴───────────────────────────┤
+│          Open-Meteo API (Previsão meteorológica)        │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ### Stack
@@ -44,7 +48,7 @@ src/
 │   │   ├── login/
 │   │   └── register/
 │   ├── (app)/               # Área autenticada
-│   │   ├── dashboard/       # Dashboard principal
+│   │   ├── dashboard/       # Dashboard com mapa de polígonos e cards com clima
 │   │   ├── properties/      # Listagem, cadastro e detalhe de propriedades
 │   │   │   ├── [id]/        # Relatório socioambiental completo
 │   │   │   └── new/         # Cadastrar via CAR ou mapa
@@ -52,12 +56,13 @@ src/
 │   │   │   └── [id]/        # Detalhe do fornecedor + propriedades
 │   │   │       └── cars/new/ # Adicionar propriedade ao fornecedor (CAR ou mapa)
 │   │   ├── monitoring/      # Monitoramento de conformidade
+│   │   ├── meteorologia/    # Previsão meteorológica por propriedade (14 dias)
 │   │   ├── reports/
 │   │   │   ├── esg/         # Visão geral ESG de todas propriedades
 │   │   │   ├── eudr/        # Relatório EUDR por propriedade
 │   │   │   ├── car/         # Relatório ESG por código CAR
 │   │   │   └── producer/    # Relatório do produtor por CPF/CNPJ
-│   │   ├── settings/        # Configurações + Modo Avançado
+│   │   ├── settings/        # Configurações + Modo Avançado + Feature Flags (super admin)
 │   │   └── onboarding/      # Fluxo de onboarding (3 passos)
 │   └── api/                 # API Routes
 │       ├── auth/            # NextAuth + registro
@@ -67,17 +72,20 @@ src/
 │       ├── producer-report/ # Relatório ESG do produtor
 │       ├── alerts/          # Listagem e marcação de alertas
 │       ├── suppliers/       # Consulta avulsa + CRUD de fornecedores registrados
-│       ├── settings/        # Configurações
+│       ├── weather/         # Proxy Open-Meteo com cache (previsão 14 dias)
+│       ├── features/        # Feature flags do workspace ativo
+│       ├── settings/        # Configurações + toggle de features (super admin)
 │       └── workspace/       # Troca de workspace
 ├── components/
 │   ├── layout/              # Sidebar, TopBar, MobileDrawer, MobileNav
-│   ├── dashboard/           # PropertyCard, stats, semáforo
+│   ├── dashboard/           # DashboardClient, PropertyCard, WeatherMini, stats
 │   ├── reports/             # Seções do relatório socioambiental
 │   │   ├── eudr-property-section.tsx  # EUDR integrado no detalhe
 │   │   ├── detalhamento-apontamentos.tsx  # Expandível por camada
 │   │   ├── evolution-chart.tsx  # Gráfico de evolução
 │   │   └── ...
-│   ├── maps/                # Mapa Leaflet com camadas, busca por clique e endereço
+│   ├── maps/                # Mapa Leaflet, busca por clique, mapa de polígonos (overview)
+│   ├── meteorologia/        # MeteorologiaClient (previsão 14 dias, tabela detalhada)
 │   ├── pdf/                 # Geração de PDF
 │   ├── eudr/                # Componentes EUDR
 │   ├── alerts/              # Lista, filtros e badges de alertas
@@ -101,6 +109,23 @@ src/
 
 ## Funcionalidades
 
+### Dashboard
+
+Tela inicial com visão consolidada:
+- **Saudação personalizada** com nome do usuário e dot de status
+- **Stats compactos** em row horizontal: propriedades, conformes, alertas ESG, alertas EUDR
+- **Mapa de polígonos**: Todas as propriedades renderizadas como polígonos GeoJSON coloridos por status ESG (verde/vermelho/cinza), com tooltip no hover e clique para detalhe
+- **Cards de propriedade** com previsão do tempo integrada (temperatura, condição, chuva 3 dias)
+
+### Meteorologia
+
+Previsão meteorológica detalhada por propriedade (`/meteorologia`):
+- Seletor de propriedade (dropdown)
+- Previsão de 14 dias via Open-Meteo API (gratuita, sem chave)
+- **Cards de resumo**: Chuva acumulada, janela de pulverização, dias secos, evapotranspiração média
+- **Tabela diária**: Temperatura, chuva, umidade, vento, ET₀ e código de condição
+- **Janela de pulverização**: Calculada automaticamente quando umidade < 85% e vento < 15 km/h
+
 ### Minhas Propriedades
 
 Cards visuais com indicadores de status:
@@ -109,6 +134,7 @@ Cards visuais com indicadores de status:
 - Código CAR completo sem truncamento
 - Status ESG e EUDR com ícones dedicados (ShieldCheck, Globe)
 - Contador de apontamentos e data da última verificação
+- Previsão do tempo do dia (WeatherMini)
 - Hover com elevação e link "Ver detalhes"
 
 Duas formas de cadastrar:
@@ -185,6 +211,7 @@ Cada camada ESG e do produtor possui um ícone de informação que explica o sig
 - Auto-fit nos bounds do polígono
 - Busca por endereço (OpenStreetMap Nominatim)
 - Busca por clique: encontra CARs nas coordenadas clicadas
+- **Mapa Overview (Dashboard)**: Polígonos GeoJSON de todas as propriedades, coloridos por status ESG, com tooltip e auto-zoom
 
 ### Onboarding
 
@@ -200,14 +227,23 @@ Fluxo guiado em 3 passos após o registro:
 - Roles: OWNER, ADMIN, MEMBER
 - Segregação completa de dados por workspace
 
+### Feature Flags
+
+Sistema de controle de funcionalidades por workspace:
+- **Relatórios**: Seção oculta por padrão, habilitável por super admin
+- **Super Admin**: Campo `superAdmin` no modelo User, painel exclusivo em Configurações
+- **Proteção de rotas**: Layout de relatórios redireciona para `/dashboard` se feature desabilitada
+
 ### Navegação
 
 Sidebar desktop e bottom nav mobile com a ordem:
-1. **Minhas Propriedades** — Cadastro e gestão de propriedades próprias
-2. **Fornecedores** — Cadastro e monitoramento de fornecedores
-3. **Monitoramento** — Painel de conformidade e alertas
-4. **Relatórios** (submenu) — ESG Completo, EUDR, Relatório Produtor
-5. **Configurações** — Perfil, workspace, modo avançado
+1. **Dashboard** — Mapa de propriedades e resumo com clima
+2. **Minhas Propriedades** — Cadastro e gestão de propriedades próprias
+3. **Fornecedores** — Cadastro e monitoramento de fornecedores
+4. **Monitoramento** — Painel de conformidade e alertas
+5. **Meteorologia** — Previsão do tempo por propriedade
+6. **Relatórios** (submenu, feature flag) — ESG Completo, EUDR, Relatório Produtor
+7. **Configurações** — Perfil, workspace, modo avançado, feature flags (super admin)
 
 ### Release Notes In-App
 
@@ -257,6 +293,15 @@ Modal "O que mudou?" com abas de versão e cards de funcionalidades. Exibido aut
 
 - Geocodificação de endereços para busca no mapa
 
+### Open-Meteo API (`api.open-meteo.com`)
+
+| Endpoint | Descrição |
+|----------|-----------|
+| `GET /v1/forecast` | Previsão diária 14 dias (temp, chuva, umidade, vento, ET₀, weather code) |
+
+**Autenticação**: Nenhuma (API gratuita e aberta)
+**Cache**: Revalidação a cada 1 hora via `next.revalidate`
+
 ## Modelos de Dados
 
 ```
@@ -272,8 +317,8 @@ User ──< WorkspaceMember >── Workspace
 
 | Modelo | Campos principais |
 |--------|-------------------|
-| **User** | name, email, cpfCnpj, passwordHash, advancedMode |
-| **Workspace** | name, slug, type (FREE/PARTNER) |
+| **User** | name, email, cpfCnpj, passwordHash, advancedMode, superAdmin |
+| **Workspace** | name, slug, type (FREE/PARTNER), settings (JSON: reportsEnabled) |
 | **Property** | carCode, name, municipio, uf, areaImovel, esgStatus, eudrStatus, geoPolygon, lastCheckAt |
 | **EsgReport** | esgStatus, fullData (JSON), totalApontamentos |
 | **EudrReport** | euStatus, layerData (JSON), prodesLayerData (JSON), forestLossArea |

@@ -2,6 +2,49 @@
 
 Todas as mudanças notáveis neste projeto serão documentadas aqui.
 
+## [0.0.3] - 2026-02-22
+
+### Funcionalidades
+
+- **Dashboard Redesenhado**: Layout em 2 colunas com mapa interativo de polígonos e cards de propriedade com clima integrado
+- **Mapa de Propriedades**: Polígonos GeoJSON coloridos por status ESG (verde/vermelho/cinza) com tooltip e clique para detalhe
+- **Meteorologia**: Nova página `/meteorologia` com previsão de 14 dias por propriedade via Open-Meteo API (gratuita)
+- **Indicadores Meteorológicos**: Temperatura, chuva, umidade, vento, ET₀ e cálculo automático de janela de pulverização
+- **Clima no Card**: Cada card de propriedade mostra previsão do dia (temperatura, condição, chuva acumulada 3 dias)
+- **Landing Page**: Página pública com apresentação do produto, features e CTAs para registro/login
+- **Feature Flags**: Sistema de flags por workspace controlado por super admin via Settings
+- **Super Admin**: Novo campo `superAdmin` no modelo User com painel exclusivo de controle
+- **Proteção de Relatórios**: Seção de Relatórios oculta por padrão, habilitável via feature flag
+
+### Melhorias
+
+- **EUDR Desativado por Padrão**: `eudrEnabled` agora é `false` por padrão para evitar confusão no relatório
+- **Header Compacto**: Saudação personalizada "Bem-vindo, {nome}" com dot de status inline
+- **Stats Compactos**: 4 indicadores em row horizontal com ícones
+- **Legenda do Mapa**: Legenda visual com cores de status abaixo do mapa
+
+### Navegação
+
+- **Dashboard no Topo**: Item "Dashboard" (HomeIcon) adicionado como primeiro item em sidebar/drawer/bottom nav
+- **Meteorologia**: Item "Meteorologia" (CloudIcon) adicionado na navegação entre Monitoramento e Relatórios
+- **Mobile**: Bottom nav com "Clima" substituindo "Config." (acessível via drawer)
+
+### Infraestrutura
+
+- **API `/api/weather`**: Proxy para Open-Meteo com cache de 1 hora
+- **API `/api/features`**: Retorna feature flags do workspace ativo
+- **API `/api/settings/features`**: Toggle de flags (somente super admin)
+- **`trustHost: true`**: NextAuth configurado para funcionar atrás de reverse proxy (CapRover)
+- **`getPolygonCentroid()`**: Utilitário para calcular centroid de GeoJSON
+
+### Deploy
+
+- **Dockerfile**: Build multi-stage para CapRover com Next.js standalone + Prisma 7
+- **`.dockerignore`**: Exclusão de node_modules, .next, testes, PDFs
+- **`captain-definition`**: Configuração CapRover
+
+---
+
 ## [0.0.2] - 2026-02-22
 
 ### Funcionalidades

@@ -55,19 +55,21 @@ Documentação de referência do design system e componentes de interface do Agr
 
 | Ordem | Item | Ícone | Rota |
 |-------|------|-------|------|
-| 1 | Minhas Propriedades | MapPinIcon | `/properties` |
-| 2 | Fornecedores | UserGroupIcon | `/suppliers` |
-| 3 | Monitoramento | EyeIcon | `/monitoring` |
-| 4 | Relatórios | DocumentTextIcon | submenu |
-| 4.1 | → ESG Completo | ChartBarIcon | `/reports/esg` |
-| 4.2 | → EUDR | GlobeAmericasIcon | `/reports/eudr` |
-| 4.3 | → Relatório Produtor | IdentificationIcon | `/reports/producer` |
-| 5 | Configurações | Cog6ToothIcon | `/settings` |
+| 1 | Dashboard | HomeIcon | `/dashboard` |
+| 2 | Minhas Propriedades | MapPinIcon | `/properties` |
+| 3 | Fornecedores | UserGroupIcon | `/suppliers` |
+| 4 | Monitoramento | EyeIcon | `/monitoring` |
+| 5 | Meteorologia | CloudIcon | `/meteorologia` |
+| 6 | Relatórios (feature flag) | DocumentTextIcon | submenu |
+| 6.1 | → ESG Completo | ChartBarIcon | `/reports/esg` |
+| 6.2 | → EUDR | GlobeAmericasIcon | `/reports/eudr` |
+| 6.3 | → Relatório Produtor | IdentificationIcon | `/reports/producer` |
+| 7 | Configurações | Cog6ToothIcon | `/settings` |
 
 ### Mobile
 
-- **Bottom Nav**: Mesmos 5 itens da sidebar
-- **Hamburger Drawer**: Menu lateral com todos os itens e subitens
+- **Bottom Nav**: Dashboard, Propriedades, Fornecedores, Clima, Monitoramento
+- **Hamburger Drawer**: Menu lateral com todos os itens e subitens (incluindo Relatórios se habilitado)
 
 ## Componentes
 
@@ -82,7 +84,43 @@ Card de propriedade própria com:
 - Status EUDR com ícone GlobeAmericasIcon
 - Contador de apontamentos
 - Data da última verificação
+- Slot `weatherSlot` para componente WeatherMini
 - Hover: sombra elevada + "Ver detalhes →"
+
+### WeatherMini
+
+Componente compacto de clima para dentro do card:
+- Ícone de condição do tempo (emoji)
+- "Previsão hoje" label em azul
+- Temperatura máxima/mínima em °C
+- Condição do tempo (ex: "Céu limpo", "Chuva leve")
+- Badge de chuva acumulada em 3 dias (se > 0)
+
+### PropertiesOverviewMap
+
+Mapa interativo para o Dashboard:
+- Polígonos GeoJSON de todas as propriedades
+- Cor por status ESG: verde (conforme), vermelho (não conforme), cinza (pendente)
+- Tooltip no hover com nome + status
+- Clique redireciona para detalhe (`/properties/[id]`)
+- Auto-zoom (`FitAllBounds`) para abranger todas as propriedades
+- Legenda de cores abaixo do mapa
+
+### MeteorologiaClient
+
+Página completa de meteorologia:
+- Dropdown seletor de propriedade
+- Previsão 14 dias em cards verticais (ícone, data, temp, chuva, umidade, vento)
+- 4 cards de resumo: chuva acumulada, janela de pulverização, dias secos, ET₀ média
+- Tabela detalhada com todas as variáveis diárias
+- Cálculo de janela de pulverização (umidade < 85%, vento < 15 km/h)
+
+### FeatureFlagsSection
+
+Painel de feature flags (somente super admin):
+- Borda amber para destaque visual
+- Toggle switch para `reportsEnabled`
+- Chamada PATCH para `/api/settings/features`
 
 ### SupplierCard
 
@@ -174,6 +212,7 @@ Modal "O que mudou?" exibido automaticamente quando a versão muda:
 
 Componente: `src/components/ui/release-notes.tsx`
 Dados: Array `RELEASES` com versões, datas e features (ícone, cor, título, descrição)
+Versão atual: `0.0.3`
 
 ## Formulários de Autenticação
 
@@ -194,3 +233,4 @@ Dados: Array `RELEASES` com versões, datas e features (ícone, cor, título, de
 - **Camadas IBGE**: Estados e municípios via WMS
 - **Busca por endereço**: Input com geocodificação Nominatim
 - **Dimensões**: 250px (mobile), 450px (desktop)
+- **Mapa Overview (Dashboard)**: Polígonos GeoJSON coloridos por status ESG, tooltip, auto-zoom, legenda

@@ -2,12 +2,10 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 
 export default function RegisterPage() {
-  const router = useRouter()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -54,7 +52,7 @@ export default function RegisterPage() {
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
-          cpfCnpj: formData.cpfCnpj || undefined,
+          cpfCnpj: formData.cpfCnpj,
           phone: formData.phone || undefined,
           password: formData.password,
         }),
@@ -89,8 +87,7 @@ export default function RegisterPage() {
         return
       }
 
-      router.push('/onboarding')
-      router.refresh()
+      window.location.href = '/onboarding'
     } catch {
       setError('Erro ao conectar com o servidor')
       setIsLoading(false)
@@ -152,7 +149,7 @@ export default function RegisterPage() {
 
       <div>
         <label htmlFor="cpfCnpj" className="block text-sm font-medium text-neutral-text-primary">
-          CPF/CNPJ
+          CPF/CNPJ <span className="text-red-500">*</span>
         </label>
         <input
           id="cpfCnpj"
@@ -160,6 +157,7 @@ export default function RegisterPage() {
           type="text"
           value={formData.cpfCnpj}
           onChange={handleChange}
+          required
           aria-invalid={!!fieldErrors.cpfCnpj}
           className={inputClass}
           placeholder="000.000.000-00 ou 00.000.000/0001-00"

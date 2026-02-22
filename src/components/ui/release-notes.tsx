@@ -11,6 +11,9 @@ import {
   EyeIcon,
   DocumentTextIcon,
   LockClosedIcon,
+  CloudIcon,
+  HomeIcon,
+  KeyIcon,
 } from '@heroicons/react/24/outline'
 import { cn } from '@/lib/utils'
 
@@ -28,6 +31,54 @@ interface ReleaseVersion {
 }
 
 const RELEASES: ReleaseVersion[] = [
+  {
+    version: '0.0.3',
+    date: '22 de Fevereiro, 2026',
+    features: [
+      {
+        icon: HomeIcon,
+        iconColor: 'text-blue-500',
+        title: 'Dashboard Redesenhado',
+        description:
+          'Nova tela inicial com mapa interativo mostrando os polígonos de todas as suas propriedades coloridos por status ESG.',
+      },
+      {
+        icon: CloudIcon,
+        iconColor: 'text-cyan-500',
+        title: 'Meteorologia',
+        description:
+          'Previsão do tempo de 14 dias para cada propriedade com temperatura, chuva, janela de pulverização e evapotranspiração.',
+      },
+      {
+        icon: MapPinIcon,
+        iconColor: 'text-green-500',
+        title: 'Clima no Card da Propriedade',
+        description:
+          'Cada card de propriedade agora mostra a previsão de hoje com temperatura, condição do tempo e chuva esperada.',
+      },
+      {
+        icon: DocumentTextIcon,
+        iconColor: 'text-amber-500',
+        title: 'Landing Page',
+        description:
+          'Nova página inicial pública com apresentação do produto, funcionalidades e botões para registro e login.',
+      },
+      {
+        icon: KeyIcon,
+        iconColor: 'text-rose-500',
+        title: 'Feature Flags e Super Admin',
+        description:
+          'Controle de funcionalidades por workspace. Apenas super admins podem habilitar ou desabilitar módulos como Relatórios.',
+      },
+      {
+        icon: GlobeAltIcon,
+        iconColor: 'text-purple-500',
+        title: 'EUDR Desativado por Padrão',
+        description:
+          'O módulo EUDR agora vem desativado por padrão para evitar confusão. Pode ser ativado no Modo Avançado.',
+      },
+    ],
+  },
   {
     version: '0.0.2',
     date: '22 de Fevereiro, 2026',
@@ -143,7 +194,7 @@ export function ReleaseNotes() {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
       <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* Header */}
         <div className="px-6 pt-6">

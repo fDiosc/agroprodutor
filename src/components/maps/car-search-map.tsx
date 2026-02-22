@@ -153,7 +153,7 @@ export function CarSearchMap({ onSelectCar, className = '' }: CarSearchMapProps)
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=1&q=${encodeURIComponent(q)}`,
-        { headers: { 'User-Agent': 'AgroProdutor/0.0.2' } }
+        { headers: { 'User-Agent': 'AgroProdutor/0.0.3' } }
       )
       const data = await res.json()
 

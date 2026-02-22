@@ -2,12 +2,11 @@
 
 import React, { Suspense, useState } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 
 function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
 
@@ -37,8 +36,7 @@ function LoginForm() {
     }
 
     if (result?.ok) {
-      router.push(callbackUrl)
-      router.refresh()
+      window.location.href = callbackUrl
     }
   }
 

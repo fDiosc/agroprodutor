@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { z, ZodError } from 'zod'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   email: z.string().email('Email inválido'),
-  cpfCnpj: z.string().optional(),
+  cpfCnpj: z.string().min(1, 'CPF/CNPJ é obrigatório'),
   phone: z.string().optional(),
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
 })
@@ -27,6 +28,17 @@ export async function POST(request: Request) {
       )
     }
 
+    const existingCpfCnpj = await prisma.user.findUnique({
+      where: { cpfCnpj: data.cpfCnpj },
+    })
+
+    if (existingCpfCnpj) {
+      return NextResponse.json(
+        { error: 'Este CPF/CNPJ já está cadastrado' },
+        { status: 409 }
+      )
+    }
+
     const passwordHash = await bcrypt.hash(data.password, 12)
     const slug =
       data.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-')
@@ -36,7 +48,7 @@ export async function POST(request: Request) {
         data: {
           name: data.name,
           email: data.email,
-          cpfCnpj: data.cpfCnpj || null,
+          cpfCnpj: data.cpfCnpj,
           phone: data.phone || null,
           passwordHash,
         },
@@ -81,6 +93,24 @@ export async function POST(request: Request) {
         { error: 'Dados inválidos', details: error.issues },
         { status: 400 }
       )
+    }
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      const target = (error.meta?.target as string[]) ?? []
+      if (target.includes('cpf_cnpj')) {
+        return NextResponse.json(
+          { error: 'Este CPF/CNPJ já está cadastrado' },
+          { status: 409 }
+        )
+      }
+      if (target.includes('email')) {
+        return NextResponse.json(
+          { error: 'Este email já está cadastrado' },
+          { status: 409 }
+        )
+      }
     }
     console.error('Registration error:', error)
     return NextResponse.json(
