@@ -38,6 +38,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name,
           cpfCnpj: user.cpfCnpj,
           advancedMode: user.advancedMode,
+          superAdmin: user.superAdmin,
           activeWorkspaceId: user.memberships[0]?.workspaceId || '',
         }
       },
@@ -53,6 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id!
         token.cpfCnpj = user.cpfCnpj
         token.advancedMode = user.advancedMode ?? false
+        token.superAdmin = user.superAdmin ?? false
         token.activeWorkspaceId = user.activeWorkspaceId ?? ''
       }
       // Handle session update (e.g., workspace switch, advanced mode toggle)
@@ -74,6 +76,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.id = token.id as string
       session.user.cpfCnpj = token.cpfCnpj as string | null | undefined
       session.user.advancedMode = (token.advancedMode as boolean) ?? false
+      session.user.superAdmin = (token.superAdmin as boolean) ?? false
       session.user.activeWorkspaceId = (token.activeWorkspaceId as string) ?? ''
       return session
     },

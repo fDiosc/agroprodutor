@@ -15,10 +15,12 @@ import {
   Cog6ToothIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
+  HomeIcon,
 } from '@heroicons/react/24/outline'
 import { cn } from '@/lib/utils'
 
 const navItems = [
+  { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { label: 'Minhas Propriedades', href: '/properties', icon: MapPinIcon },
   { label: 'Fornecedores', href: '/suppliers', icon: UserGroupIcon },
   { label: 'Monitoramento', href: '/monitoring', icon: EyeIcon },
@@ -37,9 +39,10 @@ const navItems = [
 interface SidebarProps {
   isOpen: boolean
   onToggle?: () => void
+  reportsEnabled?: boolean
 }
 
-export function Sidebar({ isOpen, onToggle }: SidebarProps) {
+export function Sidebar({ isOpen, onToggle, reportsEnabled = false }: SidebarProps) {
   const pathname = usePathname()
   const [reportsExpanded, setReportsExpanded] = useState(
     pathname.startsWith('/reports')
@@ -91,7 +94,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1 px-3">
-          {navItems.map((item) => {
+          {navItems.filter((item) => !('children' in item) || reportsEnabled).map((item) => {
             if ('children' in item) {
               return (
                 <li key={item.label}>

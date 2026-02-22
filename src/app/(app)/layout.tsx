@@ -14,6 +14,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
   const [alertCount, setAlertCount] = useState(0)
+  const [reportsEnabled, setReportsEnabled] = useState(false)
   const pathname = usePathname()
 
   const fetchAlertCount = useCallback(async () => {
@@ -28,11 +29,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  const fetchFeatures = useCallback(async () => {
+    try {
+      const res = await fetch('/api/features')
+      if (res.ok) {
+        const data = await res.json()
+        setReportsEnabled(data.reportsEnabled === true)
+      }
+    } catch {
+      // silent
+    }
+  }, [])
+
   useEffect(() => {
     fetchAlertCount()
-  }, [pathname, fetchAlertCount])
+    fetchFeatures()
+  }, [pathname, fetchAlertCount, fetchFeatures])
 
-  // Poll every 60s
   useEffect(() => {
     const interval = setInterval(fetchAlertCount, 60_000)
     return () => clearInterval(interval)
@@ -43,7 +56,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-neutral-background">
       {/* Desktop sidebar */}
       <div className="hidden md:block">
-        <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((p) => !p)} />
+        <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen((p) => !p)} reportsEnabled={reportsEnabled} />
       </div>
 
       {/* Mobile drawer (hamburger menu) */}
@@ -51,6 +64,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <MobileDrawer
           isOpen={mobileDrawerOpen}
           onClose={() => setMobileDrawerOpen(false)}
+          reportsEnabled={reportsEnabled}
         />
       </div>
 

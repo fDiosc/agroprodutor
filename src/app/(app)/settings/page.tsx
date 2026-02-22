@@ -5,6 +5,7 @@ import { ProfileSection } from '@/components/settings/profile-section'
 import { AdvancedModeToggle } from '@/components/settings/advanced-mode-toggle'
 import { ReportConfigSection } from '@/components/settings/report-config-section'
 import { WorkspaceSection } from '@/components/settings/workspace-section'
+import { FeatureFlagsSection } from '@/components/settings/feature-flags-section'
 
 export default async function SettingsPage() {
   const session = await auth()
@@ -21,6 +22,16 @@ export default async function SettingsPage() {
   })
 
   if (!user) redirect('/login')
+
+  let reportsEnabled = false
+  if (user.superAdmin && session.user.activeWorkspaceId) {
+    const ws = await prisma.workspace.findUnique({
+      where: { id: session.user.activeWorkspaceId },
+      select: { settings: true },
+    })
+    const settings = (ws?.settings ?? {}) as Record<string, unknown>
+    reportsEnabled = settings.reportsEnabled === true
+  }
 
   const workspaces = user.memberships.map((m) => ({
     id: m.workspace.id,
@@ -57,6 +68,9 @@ export default async function SettingsPage() {
             producerReportEnabled: user.reportConfig?.producerReportEnabled ?? true,
           }}
         />
+      )}
+      {user.superAdmin && (
+        <FeatureFlagsSection reportsEnabled={reportsEnabled} />
       )}
     </div>
   )

@@ -15,10 +15,12 @@ import {
   Cog6ToothIcon,
   XMarkIcon,
   ChevronDownIcon,
+  HomeIcon,
 } from '@heroicons/react/24/outline'
 import { cn } from '@/lib/utils'
 
 const navItems = [
+  { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { label: 'Minhas Propriedades', href: '/properties', icon: MapPinIcon },
   { label: 'Fornecedores', href: '/suppliers', icon: UserGroupIcon },
   { label: 'Monitoramento', href: '/monitoring', icon: EyeIcon },
@@ -37,9 +39,10 @@ const navItems = [
 interface MobileDrawerProps {
   isOpen: boolean
   onClose: () => void
+  reportsEnabled?: boolean
 }
 
-export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
+export function MobileDrawer({ isOpen, onClose, reportsEnabled = false }: MobileDrawerProps) {
   const pathname = usePathname()
   const [reportsOpen, setReportsOpen] = useState(pathname.startsWith('/reports'))
 
@@ -73,7 +76,7 @@ export function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-1 px-3">
-            {navItems.map((item) => {
+            {navItems.filter((item) => !('children' in item) || reportsEnabled).map((item) => {
               if ('children' in item) {
                 return (
                   <li key={item.label}>

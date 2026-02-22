@@ -4,6 +4,7 @@ declare module 'next-auth' {
   interface User {
     cpfCnpj?: string | null
     advancedMode?: boolean
+    superAdmin?: boolean
     activeWorkspaceId?: string
   }
   interface Session {
@@ -11,6 +12,7 @@ declare module 'next-auth' {
       id: string
       cpfCnpj?: string | null
       advancedMode: boolean
+      superAdmin: boolean
       activeWorkspaceId: string
     }
   }
@@ -21,6 +23,7 @@ declare module 'next-auth/jwt' {
     id: string
     cpfCnpj?: string | null
     advancedMode: boolean
+    superAdmin: boolean
     activeWorkspaceId: string
   }
 }
