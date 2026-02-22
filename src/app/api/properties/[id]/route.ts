@@ -57,13 +57,15 @@ export async function PATCH(_request: Request, { params }: RouteParams) {
 
   try {
     const geoResult = await geoServer.getPropertyPolygon(normalizedCar).catch(() => null)
-    const geoPolygon = geoResult ?? property.geoPolygon
+    const geoPolygon: object | null = geoResult
+      ? (geoResult as object)
+      : (property.geoPolygon as object | null)
 
     await prisma.property.update({
       where: { id },
       data: {
         ...(needsCarFix ? { carCode: normalizedCar } : {}),
-        geoPolygon: (geoPolygon as unknown as Record<string, unknown>) ?? undefined,
+        geoPolygon: geoPolygon ?? undefined,
       },
     })
 
