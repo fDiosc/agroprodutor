@@ -114,7 +114,7 @@ model ReportConfig {
   id                    String   @id @default(uuid())
   userId                String   @unique @map("user_id")
   esgEnabled            Boolean  @default(true) @map("esg_enabled")
-  eudrEnabled           Boolean  @default(true) @map("eudr_enabled")
+  eudrEnabled           Boolean  @default(false) @map("eudr_enabled")
   productivityEnabled   Boolean  @default(true) @map("productivity_enabled")
   producerReportEnabled Boolean  @default(true) @map("producer_report_enabled")
   updatedAt             DateTime @updatedAt @map("updated_at")

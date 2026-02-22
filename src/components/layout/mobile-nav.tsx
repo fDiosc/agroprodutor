@@ -7,14 +7,14 @@ import {
   EyeIcon,
   MapPinIcon,
   UserGroupIcon,
-  Cog6ToothIcon,
+  CloudIcon,
   HomeIcon,
 } from '@heroicons/react/24/outline'
 import {
   EyeIcon as EyeIconSolid,
   MapPinIcon as MapPinIconSolid,
   UserGroupIcon as UserGroupIconSolid,
-  Cog6ToothIcon as Cog6ToothIconSolid,
+  CloudIcon as CloudIconSolid,
   HomeIcon as HomeIconSolid,
 } from '@heroicons/react/24/solid'
 import { cn } from '@/lib/utils'
@@ -24,7 +24,7 @@ const tabs = [
   { label: 'Propriedades', href: '/properties', icon: MapPinIcon, iconSolid: MapPinIconSolid },
   { label: 'Fornecedores', href: '/suppliers', icon: UserGroupIcon, iconSolid: UserGroupIconSolid },
   { label: 'Monitoramento', href: '/monitoring', icon: EyeIcon, iconSolid: EyeIconSolid },
-  { label: 'Config.', href: '/settings', icon: Cog6ToothIcon, iconSolid: Cog6ToothIconSolid },
+  { label: 'Clima', href: '/meteorologia', icon: CloudIcon, iconSolid: CloudIconSolid },
 ] as const
 
 export function MobileNav() {

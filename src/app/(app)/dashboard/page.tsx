@@ -8,9 +8,7 @@ import {
   ClipboardDocumentListIcon,
   BellAlertIcon,
 } from '@heroicons/react/24/outline'
-import { StatusSemaphore } from '@/components/dashboard/status-semaphore'
-import { PropertyCard } from '@/components/dashboard/property-card'
-import { StatsSummary } from '@/components/dashboard/stats-summary'
+import { DashboardClient } from '@/components/dashboard/dashboard-client'
 
 export default async function DashboardPage() {
   const session = await auth()
@@ -22,19 +20,11 @@ export default async function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-neutral-text-primary">
-            Bem-vindo ao AgroProdutor
+            Bem-vindo, {session.user.name?.split(' ')[0] ?? 'Produtor'}
           </h1>
           <p className="mt-1 text-neutral-text-secondary">
-            Sua plataforma de monitoramento socioambiental e rastreabilidade
-            para produtores rurais.
+            Nenhum workspace ativo. Entre em contato com o suporte.
           </p>
-        </div>
-        <div className="rounded-lg border border-neutral-border bg-white p-8 shadow-card">
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-neutral-text-secondary">
-              Nenhum workspace ativo. Entre em contato com o suporte.
-            </p>
-          </div>
         </div>
       </div>
     )
@@ -80,14 +70,12 @@ export default async function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-neutral-text-primary">
-            Bem-vindo ao AgroProdutor
+            Bem-vindo, {session.user.name?.split(' ')[0] ?? 'Produtor'}
           </h1>
           <p className="mt-1 text-neutral-text-secondary">
-            Sua plataforma de monitoramento socioambiental e rastreabilidade
-            para produtores rurais.
+            Sua plataforma de monitoramento socioambiental
           </p>
         </div>
-
         <div className="rounded-lg border border-neutral-border bg-white p-8 shadow-card">
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <p className="text-neutral-text-secondary">
@@ -106,73 +94,64 @@ export default async function DashboardPage() {
     )
   }
 
+  const statusColor =
+    semaphoreStatus === 'green'
+      ? '#00C287'
+      : semaphoreStatus === 'yellow'
+        ? '#F59E0B'
+        : '#EF4444'
+
+  const statusLabel =
+    semaphoreStatus === 'green'
+      ? 'Tudo conforme'
+      : semaphoreStatus === 'yellow'
+        ? `${totalApontamentos} apontamento${totalApontamentos !== 1 ? 's' : ''}`
+        : `${naoConformeCount} não conforme${naoConformeCount !== 1 ? 's' : ''}`
+
   const stats = [
     {
-      icon: <MapPinIcon className="h-6 w-6" />,
+      icon: 'MapPinIcon',
       value: totalProperties,
-      label: 'Total de propriedades',
+      label: 'Propriedades',
     },
     {
-      icon: <CheckCircleIcon className="h-6 w-6" />,
+      icon: 'CheckCircleIcon',
       value: conformeProperties,
-      label: 'Propriedades conformes',
+      label: 'Conformes',
     },
     {
-      icon: <ClipboardDocumentListIcon className="h-6 w-6" />,
+      icon: 'ClipboardDocumentListIcon',
       value: totalApontamentos,
-      label: 'Total de apontamentos',
+      label: 'Apontamentos',
     },
     {
-      icon: <BellAlertIcon className="h-6 w-6" />,
+      icon: 'BellAlertIcon',
       value: unreadAlerts,
-      label: 'Alertas não lidos',
+      label: 'Alertas',
     },
   ]
 
+  const serializedProperties = properties.map((p) => ({
+    id: p.id,
+    name: p.name,
+    carCode: p.carCode,
+    municipio: p.municipio,
+    uf: p.uf,
+    areaImovel: p.areaImovel,
+    esgStatus: p.esgStatus,
+    eudrStatus: p.eudrStatus,
+    totalApontamentos: p.esgReports[0]?.totalApontamentos ?? 0,
+    lastCheckAt: p.lastCheckAt?.toISOString() ?? null,
+    geoPolygon: p.geoPolygon as GeoJSON.FeatureCollection | GeoJSON.Feature | null,
+  }))
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-neutral-text-primary">
-          Bem-vindo ao AgroProdutor
-        </h1>
-        <p className="mt-1 text-neutral-text-secondary">
-          Sua plataforma de monitoramento socioambiental e rastreabilidade para
-          produtores rurais.
-        </p>
-      </div>
-
-      <StatusSemaphore
-        status={semaphoreStatus}
-        totalApontamentos={totalApontamentos}
-        naoConformeCount={naoConformeCount}
-      />
-
-      <StatsSummary stats={stats} />
-
-      <div>
-        <h2 className="mb-4 text-lg font-semibold text-neutral-text-primary">
-          Minhas Propriedades
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {properties.map((property) => (
-            <PropertyCard
-              key={property.id}
-              id={property.id}
-              name={property.name}
-              carCode={property.carCode}
-              municipio={property.municipio}
-              uf={property.uf}
-              areaImovel={property.areaImovel}
-              esgStatus={property.esgStatus}
-              eudrStatus={property.eudrStatus}
-              totalApontamentos={
-                property.esgReports[0]?.totalApontamentos ?? 0
-              }
-              lastCheckAt={property.lastCheckAt?.toISOString() ?? null}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
+    <DashboardClient
+      userName={session.user.name?.split(' ')[0] ?? 'Produtor'}
+      statusColor={statusColor}
+      statusLabel={statusLabel}
+      stats={stats}
+      properties={serializedProperties}
+    />
   )
 }

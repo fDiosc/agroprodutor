@@ -28,6 +28,7 @@ interface PropertyCardProps {
   totalApontamentos: number
   lastCheckAt?: string | null
   className?: string
+  weatherSlot?: React.ReactNode
 }
 
 function StatusIndicator({ label, status, icon: Icon }: { label: string; status: string | null; icon: React.ElementType }) {
@@ -80,6 +81,7 @@ export function PropertyCard({
   totalApontamentos,
   lastCheckAt,
   className,
+  weatherSlot,
 }: PropertyCardProps) {
   const displayName = name || carCode
   const location = [municipio, uf].filter(Boolean).join(', ')
@@ -170,6 +172,12 @@ export function PropertyCard({
           <StatusIndicator label="ESG" status={esgStatus} icon={ShieldCheckIcon} />
           <StatusIndicator label="EUDR" status={eudrStatus} icon={GlobeAltIcon} />
         </div>
+
+        {weatherSlot && (
+          <div className="mt-2 rounded-lg border border-blue-100 bg-blue-50/50 px-3 py-2">
+            {weatherSlot}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="mt-3 flex items-center justify-between">

@@ -33,3 +33,36 @@ export function formatDateTime(date: Date | string): string {
     minute: '2-digit',
   })
 }
+
+export function getPolygonCentroid(
+  geoJson: GeoJSON.FeatureCollection | GeoJSON.Feature | null
+): [number, number] | null {
+  if (!geoJson) return null
+  try {
+    const features =
+      geoJson.type === 'FeatureCollection' ? geoJson.features : [geoJson]
+    let totalLat = 0
+    let totalLng = 0
+    let count = 0
+    for (const feature of features) {
+      const geometry = feature.geometry
+      if (!geometry) continue
+      const coords =
+        geometry.type === 'Polygon'
+          ? geometry.coordinates[0]
+          : geometry.type === 'MultiPolygon'
+            ? geometry.coordinates.flat()[0]
+            : null
+      if (!coords) continue
+      for (const [lng, lat] of coords as number[][]) {
+        totalLat += lat
+        totalLng += lng
+        count++
+      }
+    }
+    if (count === 0) return null
+    return [totalLat / count, totalLng / count]
+  } catch {
+    return null
+  }
+}

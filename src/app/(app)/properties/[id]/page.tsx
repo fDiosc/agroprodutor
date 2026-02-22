@@ -49,7 +49,7 @@ export default async function PropertyDetailPage({
 
   const config = {
     esgEnabled: reportConfig?.esgEnabled ?? true,
-    eudrEnabled: reportConfig?.eudrEnabled ?? true,
+    eudrEnabled: reportConfig?.eudrEnabled ?? false,
     productivityEnabled: reportConfig?.productivityEnabled ?? true,
     producerReportEnabled: reportConfig?.producerReportEnabled ?? true,
   }

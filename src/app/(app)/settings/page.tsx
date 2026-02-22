@@ -63,7 +63,7 @@ export default async function SettingsPage() {
         <ReportConfigSection
           config={{
             esgEnabled: user.reportConfig?.esgEnabled ?? true,
-            eudrEnabled: user.reportConfig?.eudrEnabled ?? true,
+            eudrEnabled: user.reportConfig?.eudrEnabled ?? false,
             productivityEnabled: user.reportConfig?.productivityEnabled ?? true,
             producerReportEnabled: user.reportConfig?.producerReportEnabled ?? true,
           }}

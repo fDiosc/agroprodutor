@@ -16,6 +16,7 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   HomeIcon,
+  CloudIcon,
 } from '@heroicons/react/24/outline'
 import { cn } from '@/lib/utils'
 
@@ -24,6 +25,7 @@ const navItems = [
   { label: 'Minhas Propriedades', href: '/properties', icon: MapPinIcon },
   { label: 'Fornecedores', href: '/suppliers', icon: UserGroupIcon },
   { label: 'Monitoramento', href: '/monitoring', icon: EyeIcon },
+  { label: 'Meteorologia', href: '/meteorologia', icon: CloudIcon },
   {
     label: 'Relatórios',
     icon: DocumentTextIcon,

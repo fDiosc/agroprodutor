@@ -87,7 +87,7 @@ export async function PATCH(request: Request) {
         create: {
           userId: session.user.id,
           esgEnabled: rc.esgEnabled ?? true,
-          eudrEnabled: rc.eudrEnabled ?? true,
+          eudrEnabled: rc.eudrEnabled ?? false,
           productivityEnabled: rc.productivityEnabled ?? true,
           producerReportEnabled: rc.producerReportEnabled ?? true,
         },
