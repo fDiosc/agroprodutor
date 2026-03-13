@@ -3,8 +3,13 @@ import Credentials from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 
+console.log('[AUTH-INIT] AUTH_SECRET set:', !!process.env.AUTH_SECRET)
+console.log('[AUTH-INIT] NEXTAUTH_SECRET set:', !!process.env.NEXTAUTH_SECRET)
+console.log('[AUTH-INIT] DATABASE_URL set:', !!process.env.DATABASE_URL)
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   providers: [
     Credentials({
       name: 'credentials',
@@ -13,6 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: 'Senha', type: 'password' },
       },
       async authorize(credentials) {
+        console.log('[AUTH] authorize() called')
         if (!credentials?.email || !credentials?.password) {
           console.log('[AUTH] Missing credentials')
           return null

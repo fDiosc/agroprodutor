@@ -21,22 +21,31 @@ function LoginForm() {
     setError(null)
     setIsLoading(true)
 
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-      callbackUrl,
-    })
+    try {
+      console.log('[LOGIN] signIn start')
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+        callbackUrl,
+      })
+      console.log('[LOGIN] signIn result:', JSON.stringify(result))
 
-    setIsLoading(false)
+      setIsLoading(false)
 
-    if (result?.error) {
-      setError('Email ou senha inválidos. Tente novamente.')
-      return
-    }
+      if (result?.error) {
+        setError('Email ou senha inválidos. Tente novamente.')
+        return
+      }
 
-    if (result?.ok) {
-      window.location.href = callbackUrl
+      if (result?.ok) {
+        console.log('[LOGIN] redirecting to:', callbackUrl)
+        window.location.href = callbackUrl
+      }
+    } catch (err) {
+      console.error('[LOGIN] signIn exception:', err)
+      setIsLoading(false)
+      setError('Erro ao conectar com o servidor. Tente novamente.')
     }
   }
 
