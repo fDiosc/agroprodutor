@@ -13,8 +13,12 @@ export async function middleware(req: NextRequest) {
 
   if (isPublic) return NextResponse.next()
 
-  const isSecure = req.headers.get('x-forwarded-proto') === 'https'
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET, secureCookie: isSecure })
+  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
+
+  let token = await getToken({ req, secret, secureCookie: true })
+  if (!token) {
+    token = await getToken({ req, secret, secureCookie: false })
+  }
 
   if (!token) {
     const loginUrl = new URL('/login', req.url)
