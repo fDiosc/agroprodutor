@@ -13,34 +13,49 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: 'Senha', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
+        if (!credentials?.email || !credentials?.password) {
+          console.log('[AUTH] Missing credentials')
+          return null
+        }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-          include: {
-            memberships: {
-              include: { workspace: true },
-              take: 1,
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email as string },
+            include: {
+              memberships: {
+                include: { workspace: true },
+                take: 1,
+              },
             },
-          },
-        })
+          })
 
-        if (!user) return null
+          if (!user) {
+            console.log('[AUTH] User not found:', credentials.email)
+            return null
+          }
 
-        const isValid = await bcrypt.compare(
-          credentials.password as string,
-          user.passwordHash
-        )
-        if (!isValid) return null
+          const isValid = await bcrypt.compare(
+            credentials.password as string,
+            user.passwordHash
+          )
+          if (!isValid) {
+            console.log('[AUTH] Invalid password for:', credentials.email)
+            return null
+          }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          cpfCnpj: user.cpfCnpj,
-          advancedMode: user.advancedMode,
-          superAdmin: user.superAdmin,
-          activeWorkspaceId: user.memberships[0]?.workspaceId || '',
+          console.log('[AUTH] Login OK:', credentials.email)
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            cpfCnpj: user.cpfCnpj,
+            advancedMode: user.advancedMode,
+            superAdmin: user.superAdmin,
+            activeWorkspaceId: user.memberships[0]?.workspaceId || '',
+          }
+        } catch (err) {
+          console.error('[AUTH] DB error:', err)
+          return null
         }
       },
     }),
